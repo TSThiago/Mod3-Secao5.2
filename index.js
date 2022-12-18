@@ -1,11 +1,13 @@
 // Part 1
+// searchForStudentActivities(2)
 
-returnStudentName(1)
+function searchForStudentActivities(studentId){
+    returnStudentName(studentId)
     .then(function (studentName) {
         console.log(studentName)
     })
     .then(function () {
-        returnTaskId(2)
+        returnTaskId(studentId)
             .then(function (array) {
                 return returnTaskName(array);
             })
@@ -13,6 +15,8 @@ returnStudentName(1)
                 console.log(names)
             })
     })
+}
+
 
 async function returnStudentName(id) {
     let student = await fetch('https://apigenerator.dronahq.com/api/g4C15xPP/students/' + id);
@@ -53,4 +57,30 @@ async function returnTaskName(array) {
         }
     })
     return tasksArray
+}
+
+// Part 2
+
+calculateStudentAverage(2)
+
+function calculateStudentAverage(studentId) {
+    let grades = []
+    returnTaskId(studentId)
+    .then(function(array){
+        array.forEach(x => {
+            grades.push(x.taskGrade)
+        })
+        return grades
+    })
+    .then(function(grades){
+        let average = parseFloat(0)
+        grades.forEach(y => {
+            average = average + parseFloat(y)
+        })
+
+        return average / grades.length
+    })
+    .then(function(average){
+        console.log(average)
+    })
 }
