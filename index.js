@@ -1,34 +1,56 @@
+async function getAllStudents() {
+    let studentsArray = await fetch('https://apigenerator.dronahq.com/api/g4C15xPP/students');
+    studentsArray = await studentsArray.json();
+    return studentsArray
+}
+
+async function getStudentById(id) {
+    let student = await fetch('https://apigenerator.dronahq.com/api/g4C15xPP/students/' + id);
+    student = await student.json();
+    return student;
+}
+
+async function getAllGrades() {
+    let gradesArray = await fetch('https://apigenerator.dronahq.com/api/5Bba_f-L/grades');
+    gradesArray = await gradesArray.json();
+    return gradesArray;
+}
+
+async function getGradeById(id) {
+    let grade = await fetch('https://apigenerator.dronahq.com/api/5Bba_f-L/grades/' + id);
+    grade = await grade.json();
+    return grade;
+}
+
+async function getAllTasks() {
+    let tasks = await fetch('https://apigenerator.dronahq.com/api/75U0yEKU/tasks');
+    tasks = await tasks.json();
+    return tasks;
+}
+
 // Part 1
+
 // searchForStudentActivities(2)
 
-function searchForStudentActivities(studentId){
-    returnStudentName(studentId)
-    .then(function (studentName) {
-        console.log(studentName)
-    })
-    .then(function () {
-        returnTaskId(studentId)
-            .then(function (array) {
-                return returnTaskName(array);
-            })
-            .then(function (names) {
-                console.log(names)
-            })
-    })
+async function searchForStudentActivities(studentId) {
+    let studentName = await returnStudentName(studentId)
+    let tasks = await returnTaskId(studentId)
+    let studentTasks = await returnTaskName(tasks)
+
+    console.log(studentName)
+    console.log(studentTasks)
 }
+
 
 
 async function returnStudentName(id) {
-    let student = await fetch('https://apigenerator.dronahq.com/api/g4C15xPP/students/' + id);
-    student = await student.json();
-    let name = student.Name;
-    return name
+    let name = await getStudentById(id);
+    return name.Name
 }
 
 async function returnTaskId(id) {
-    let arrayTask = [];
-    let task = fetch('https://apigenerator.dronahq.com/api/5Bba_f-L/grades');
-    task = await (await task).json();
+    let arrayTask = []
+    let task = await getAllGrades()
     for (let index = 0; index < task.length; index++) {
         if (id === parseInt(task[index].studentId)) {
             let studentTask = {
@@ -43,8 +65,7 @@ async function returnTaskId(id) {
 
 async function returnTaskName(array) {
     let tasksArray = [];
-    let tasks = fetch('https://apigenerator.dronahq.com/api/75U0yEKU/tasks');
-    tasks = await (await tasks).json();
+    let tasks = await getAllTasks()
     array.forEach(x => {
         for (let index = 0; index < tasks.length; index++) {
             if (parseInt(x.taskId) === parseInt(tasks[index].id)) {
@@ -61,26 +82,58 @@ async function returnTaskName(array) {
 
 // Part 2
 
-calculateStudentAverage(2)
+// calculateStudentAverage(2)
 
-function calculateStudentAverage(studentId) {
+async function calculateStudentAverage(studentId) {
+    let average = parseFloat(0)
     let grades = []
-    returnTaskId(studentId)
-    .then(function(array){
-        array.forEach(x => {
-            grades.push(x.taskGrade)
-        })
-        return grades
-    })
-    .then(function(grades){
-        let average = parseFloat(0)
-        grades.forEach(y => {
-            average = average + parseFloat(y)
-        })
+    let studentName = await returnStudentName(studentId)
+    let arrayTask = await returnTaskId(studentId)
 
-        return average / grades.length
+    arrayTask.forEach(x => {
+        grades.push(x.taskGrade)
     })
-    .then(function(average){
-        console.log(average)
+
+    grades.forEach(y => {
+        average = average + parseFloat(y)
     })
+    average = average / grades.length
+    console.log("Média: " + studentName + " - " + average)
+}
+
+// Part 3 
+
+returnPendentActivities(3)
+
+
+async function getActivitiesId() {
+    let tasks = await getAllTasks()
+    let tasksId = []
+    for (let index = 0; index < tasks.length; index++) {
+        tasksId.push(tasks[index].id)
+    }
+    return tasksId
+}
+
+async function returnPendentActivities(studentId) {
+    let pendentActivities = []
+    let submittedActivities = []
+    let activities = await getActivitiesId()
+    let activitiesId = []
+
+    let taskId = await returnTaskId(studentId)
+    for(let index = 0; index < taskId.length; index++){
+        activitiesId.push(parseInt(taskId[index].taskId))
+    }
+
+    activities.forEach(x => {
+        if (activitiesId.includes(x) === true) {
+            submittedActivities.push(x)
+        } else {
+            pendentActivities.push(x)
+        }
+    })
+
+    console.log("Atividades entregues: " +submittedActivities)
+    console.log("Atividades pendentes: " +pendentActivities)
 }
