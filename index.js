@@ -28,6 +28,12 @@ async function getAllTasks() {
     return tasks;
 }
 
+async function getTaskById(id){
+    let task = await fetch('https://apigenerator.dronahq.com/api/75U0yEKU/tasks/' +id);
+    task = await task.json();
+    return task;
+}
+
 // Part 1
 
 // searchForStudentActivities(2)
@@ -103,8 +109,7 @@ async function calculateStudentAverage(studentId) {
 
 // Part 3 
 
-returnPendentActivities(3)
-
+// returnPendentActivities(3)
 
 async function getActivitiesId() {
     let tasks = await getAllTasks()
@@ -136,4 +141,60 @@ async function returnPendentActivities(studentId) {
 
     console.log("Atividades entregues: " +submittedActivities)
     console.log("Atividades pendentes: " +pendentActivities)
+}
+
+// Part 4
+
+returnStudentsWhoseDidTheTask('Colocando em prática 1.2')
+
+async function returnStudentsWhoseDidTheTask(taskName){
+    let taskId = ''
+    let tasksarray = []
+    let studentsArray = []
+
+    let grades = await getAllGrades()
+    let tasks = await getAllTasks()
+    let students = await getAllStudents()
+
+    let taskGrades = []
+    let tasksTitle = []
+    for(let index = 0; index < grades.length; index++){
+        let task = {
+            "studentId": grades[index].studentId,
+            "taskId": parseInt(grades[index].taskId),
+            "number": grades[index].number
+        }
+        taskGrades.push(task)
+    }
+
+    for(let index = 0; index < tasks.length; index++){
+        tasksTitle.push(tasks[index].title)
+    }
+    tasks.forEach(x => {
+        if(x.title === taskName){
+            taskId = x.id
+        }
+    })
+
+    taskGrades.forEach(x => {
+        if(x.taskId === taskId){
+            tasksarray.push(x)
+        }
+    })
+
+    tasksarray.forEach(y => {
+        for(let index = 0; index < students.length; index++){
+            if(parseInt(students[index].id) === parseInt(y.studentId)){
+                let student = {
+                    "name": students[index].Name,
+                    "grade": y.number
+                }
+                studentsArray.push(student)
+            }
+        }
+    })
+    console.log("Atividade: " +taskName)
+    studentsArray.forEach(z => {
+        console.log("Nome: " +z.name+ " - Nota: " +z.grade)
+    })
 }
